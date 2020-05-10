@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Sam Portnow" />
+
+
+<title>InvestigateDataSets</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">clinical_trials</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/SamPortnow/clinical_trials">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">InvestigateDataSets</h1>
+<h4 class="author">Sam Portnow</h4>
+<h4 class="date">5/9/2020</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-05-10
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>clinical_trials/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.1). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200422code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200422)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200422code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200422)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomSamPortnowclinicaltrialstreefe42025f19c8a2c80a04a43fe3893401f4fa8dcetargetblankfe42025a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/SamPortnow/clinical_trials/tree/fe42025f19c8a2c80a04a43fe3893401f4fa8dce" target="_blank">fe42025</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomSamPortnowclinicaltrialstreefe42025f19c8a2c80a04a43fe3893401f4fa8dcetargetblankfe42025a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/SamPortnow/clinical_trials/tree/fe42025f19c8a2c80a04a43fe3893401f4fa8dce" target="_blank">fe42025</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    data/raw/
+
+Untracked files:
+    Untracked:  analysis/CleanData.Rmd
+    Untracked:  analysis/_old/
+    Untracked:  code/.ipynb_checkpoints/APIToDF-checkpoint.ipynb
+    Untracked:  code/.ipynb_checkpoints/Untitled1-checkpoint.ipynb
+    Untracked:  code/.ipynb_checkpoints/Untitled2-checkpoint.ipynb
+    Untracked:  code/_old/
+    Untracked:  data/BaselineCategoryList.feather
+    Untracked:  data/BaselineClassDenomList.feather
+    Untracked:  data/BaselineDenom.feather
+    Untracked:  data/BaselineGroup.feather
+    Untracked:  data/BaselineMeasures.feather
+    Untracked:  data/OutcomeCategoryList.feather
+    Untracked:  data/OutcomeClass.feather
+    Untracked:  data/OutcomeClassDenomList.feather
+    Untracked:  data/OutcomeDenom.feather
+    Untracked:  data/OutcomeGroup.feather
+    Untracked:  data/labelled_data/
+    Untracked:  output/baseline_group_descriptions.txt
+    Untracked:  output/baseline_group_titles.txt
+    Untracked:  output/groups_for_cleaning.xlsx
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   code/.ipynb_checkpoints/API_to_Dataframe-checkpoint.ipynb
+    Deleted:    code/API_to_Dataframe.ipynb
+    Deleted:    code/API_to_Dataframe_Scratch.ipynb
+    Deleted:    code/Untitled.ipynb
+    Deleted:    data/README.md
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/PrepBaselineGroupsAnnotating.Rmd</code>) and HTML (<code>docs/PrepBaselineGroupsAnnotating.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/SamPortnow/clinical_trials/blob/fe42025f19c8a2c80a04a43fe3893401f4fa8dce/analysis/PrepBaselineGroupsAnnotating.Rmd" target="_blank">fe42025</a>
+</td>
+<td>
+SamPortnow
+</td>
+<td>
+2020-05-10
+</td>
+<td>
+up to annotating the dataset
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>I downloaded datasets from the clinical trials API. It’s time to clean them up.</p>
+</div>
+<div id="baseline-datasets" class="section level1">
+<h1>Baseline Datasets</h1>
+<div id="baseline-measures" class="section level2">
+<h2>Baseline Measures</h2>
+</div>
+<div id="baseline-category" class="section level2">
+<h2>Baseline Category</h2>
+<pre class="r"><code>b_cat = read_feather(here::here(&#39;data&#39;, &#39;BaselineCategoryList.feather&#39;))
+skim(b_cat)</code></pre>
+<table>
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">b_cat</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">12019</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">18</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">18</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">BaselineMeasurementGroupId</td>
+<td align="right">40</td>
+<td align="right">1.00</td>
+<td align="right">5</td>
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">14</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineMeasurementValue</td>
+<td align="right">43</td>
+<td align="right">1.00</td>
+<td align="right">1</td>
+<td align="right">7</td>
+<td align="right">0</td>
+<td align="right">2596</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselineMeasurementSpread</td>
+<td align="right">9084</td>
+<td align="right">0.24</td>
+<td align="right">1</td>
+<td align="right">8</td>
+<td align="right">0</td>
+<td align="right">1567</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineMeasureTitle</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">3</td>
+<td align="right">100</td>
+<td align="right">0</td>
+<td align="right">915</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselineMeasureParamType</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">4</td>
+<td align="right">21</td>
+<td align="right">0</td>
+<td align="right">5</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineMeasureDispersionType</td>
+<td align="right">8961</td>
+<td align="right">0.25</td>
+<td align="right">10</td>
+<td align="right">20</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselineMeasureUnitOfMeasure</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">1</td>
+<td align="right">38</td>
+<td align="right">0</td>
+<td align="right">182</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineMeasurePopulationDescription</td>
+<td align="right">8741</td>
+<td align="right">0.27</td>
+<td align="right">12</td>
+<td align="right">349</td>
+<td align="right">0</td>
+<td align="right">305</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselinePopulationDescription</td>
+<td align="right">6158</td>
+<td align="right">0.49</td>
+<td align="right">4</td>
+<td align="right">349</td>
+<td align="right">0</td>
+<td align="right">82</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineClassTitle</td>
+<td align="right">8379</td>
+<td align="right">0.30</td>
+<td align="right">1</td>
+<td align="right">50</td>
+<td align="right">0</td>
+<td align="right">574</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselineCategoryTitle</td>
+<td align="right">5755</td>
+<td align="right">0.52</td>
+<td align="right">1</td>
+<td align="right">47</td>
+<td align="right">0</td>
+<td align="right">376</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">StudyId</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">11</td>
+<td align="right">11</td>
+<td align="right">0</td>
+<td align="right">214</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselineMeasureDescription</td>
+<td align="right">9084</td>
+<td align="right">0.24</td>
+<td align="right">4</td>
+<td align="right">600</td>
+<td align="right">0</td>
+<td align="right">605</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineMeasureCalculatePct</td>
+<td align="right">11377</td>
+<td align="right">0.05</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselineMeasurementComment</td>
+<td align="right">12003</td>
+<td align="right">0.00</td>
+<td align="right">22</td>
+<td align="right">77</td>
+<td align="right">0</td>
+<td align="right">7</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineMeasurementLowerLimit</td>
+<td align="right">11897</td>
+<td align="right">0.01</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">49</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselineMeasurementUpperLimit</td>
+<td align="right">11897</td>
+<td align="right">0.01</td>
+<td align="right">1</td>
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">65</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineTypeUnitsAnalyzed</td>
+<td align="right">12019</td>
+<td align="right">0.00</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Let’s look at some individual rows.</td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+<td align="right"></td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>b_cat %&gt;% sample_n(5) </code></pre>
+<pre><code># A tibble: 5 x 18
+  BaselineMeasure… BaselineMeasure… BaselineMeasure… BaselineMeasure…
+  &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;           
+1 BG002            11               &lt;NA&gt;             Race/Ethnicity,…
+2 BG003            10.4             6.5              Number of Noctu…
+3 BG002            24               &lt;NA&gt;             Sex: Female, Ma…
+4 BG002            724              &lt;NA&gt;             Sex: Female, Ma…
+5 BG001            101.60           19.11            Self-Efficacy -…
+# … with 14 more variables: BaselineMeasureParamType &lt;chr&gt;,
+#   BaselineMeasureDispersionType &lt;chr&gt;, BaselineMeasureUnitOfMeasure &lt;chr&gt;,
+#   BaselineMeasurePopulationDescription &lt;chr&gt;,
+#   BaselinePopulationDescription &lt;chr&gt;, BaselineClassTitle &lt;chr&gt;,
+#   BaselineCategoryTitle &lt;chr&gt;, StudyId &lt;chr&gt;,
+#   BaselineMeasureDescription &lt;chr&gt;, BaselineMeasureCalculatePct &lt;chr&gt;,
+#   BaselineMeasurementComment &lt;chr&gt;, BaselineMeasurementLowerLimit &lt;chr&gt;,
+#   BaselineMeasurementUpperLimit &lt;chr&gt;, BaselineTypeUnitsAnalyzed &lt;chr&gt;</code></pre>
+</div>
+<div id="baseline-class-denominator" class="section level2">
+<h2>Baseline Class Denominator</h2>
+</div>
+<div id="baslinegroup" class="section level2">
+<h2>BaslineGroup</h2>
+<pre class="r"><code>b_group = read_feather(here::here(&#39;data&#39;, &#39;BaselineGroup.feather&#39;))
+skim(b_group)</code></pre>
+<table>
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td align="left">Name</td>
+<td align="left">b_group</td>
+</tr>
+<tr class="even">
+<td align="left">Number of rows</td>
+<td align="left">8613</td>
+</tr>
+<tr class="odd">
+<td align="left">Number of columns</td>
+<td align="left">6</td>
+</tr>
+<tr class="even">
+<td align="left">_______________________</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">Column type frequency:</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">character</td>
+<td align="left">6</td>
+</tr>
+<tr class="odd">
+<td align="left">________________________</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">Group variables</td>
+<td align="left">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: character</strong></p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">skim_variable</th>
+<th align="right">n_missing</th>
+<th align="right">complete_rate</th>
+<th align="right">min</th>
+<th align="right">max</th>
+<th align="right">empty</th>
+<th align="right">n_unique</th>
+<th align="right">whitespace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">BaselineGroupId</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">5</td>
+<td align="right">5</td>
+<td align="right">0</td>
+<td align="right">18</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineGroupTitle</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">4</td>
+<td align="right">62</td>
+<td align="right">0</td>
+<td align="right">4398</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">BaselineGroupDescription</td>
+<td align="right">90</td>
+<td align="right">0.99</td>
+<td align="right">5</td>
+<td align="right">999</td>
+<td align="right">0</td>
+<td align="right">6042</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselinePopulationDescription</td>
+<td align="right">5841</td>
+<td align="right">0.32</td>
+<td align="right">3</td>
+<td align="right">350</td>
+<td align="right">0</td>
+<td align="right">810</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">StudyId</td>
+<td align="right">0</td>
+<td align="right">1.00</td>
+<td align="right">11</td>
+<td align="right">11</td>
+<td align="right">0</td>
+<td align="right">2920</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">BaselineTypeUnitsAnalyzed</td>
+<td align="right">8610</td>
+<td align="right">0.00</td>
+<td align="right">12</td>
+<td align="right">12</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">This dataset contains informatio</td>
+<td align="right">n about the</td>
+<td align="right">different baseli</td>
+<td align="right">ne gro</td>
+<td align="right">ups. L</td>
+<td align="right">et’s tak</td>
+<td align="right">e a closer</td>
+<td align="right">look</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>b_group %&gt;% sample_n(10) </code></pre>
+<pre><code># A tibble: 10 x 6
+   BaselineGroupId BaselineGroupTi… BaselineGroupDe… BaselinePopulat… StudyId
+   &lt;chr&gt;           &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;            &lt;chr&gt;  
+ 1 BG000           Tai Chi          &quot;12 weeks of Ta… &lt;NA&gt;             NCT012…
+ 2 BG002           Total            &quot;Total of all r… &lt;NA&gt;             NCT020…
+ 3 BG002           Total            &quot;Total of all r… &lt;NA&gt;             NCT021…
+ 4 BG000           Placebo          &quot;This group wil… &lt;NA&gt;             NCT004…
+ 5 BG000           All Risankizumab &quot;Participants w… Intent-to-Treat… NCT025…
+ 6 BG000           Physical Activi… &quot;The woman he j… &lt;NA&gt;             NCT027…
+ 7 BG002           Total            &quot;Total of all r… &lt;NA&gt;             NCT007…
+ 8 BG002           Chemotherapy Fo… &quot;In chemotherap… The full analys… NCT027…
+ 9 BG001           Major Depressio… &quot;Veterans with … &lt;NA&gt;             NCT012…
+10 BG000           Sativex          &quot;Each actuation… &lt;NA&gt;             NCT016…
+# … with 1 more variable: BaselineTypeUnitsAnalyzed &lt;chr&gt;</code></pre>
+<p>This is very important information! It tells me everything I need to know about the groups. I’m going to have to do a lot of cleaning to the GroupTitle. There are many different ways that a title can be parsed, so I’m going to try to label it! To do that, I’m going to write out the data to a text file and send it up to my (doccano app)[<a href="https://psyc-articles.herokuapp.com" class="uri">https://psyc-articles.herokuapp.com</a>]. Doccano is a great open source tool for annotating documents.</p>
+<pre class="r"><code>write_lines(b_group$BaselineGroupTitle, here::here(&#39;output&#39;, &#39;baseline_group_titles.txt&#39;))
+
+write_lines(b_group %&gt;% 
+              filter(! is.na(BaselineGroupDescription)) %&gt;% 
+              filter(str_squish(BaselineGroupDescription) != &#39;&#39;) %&gt;% 
+              filter(nchar(BaselineGroupDescription) &gt; 5) %&gt;% 
+              sample_frac(1) %&gt;% pull(BaselineGroupDescription) %&gt;% str_squish(), here::here(&#39;output&#39;, &#39;baseline_group_descriptions.txt&#39;))</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.6.0 (2019-04-26)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS  10.15.3
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] gtsummary_1.3.0 refinr_0.3.1    janitor_1.2.1   fs_1.4.1       
+ [5] here_0.1        gt_0.2.0.5      skimr_2.1       feather_0.3.5  
+ [9] forcats_0.5.0   stringr_1.4.0   dplyr_0.8.5     purrr_0.3.3    
+[13] readr_1.3.1     tidyr_1.0.2     tibble_3.0.0    ggplot2_3.3.0  
+[17] tidyverse_1.3.0 workflowr_1.6.1
+
+loaded via a namespace (and not attached):
+ [1] stringdist_0.9.5.5 Rcpp_1.0.3         lubridate_1.7.4    lattice_0.20-38   
+ [5] utf8_1.1.4         assertthat_0.2.1   rprojroot_1.3-2    digest_0.6.25     
+ [9] R6_2.4.1           cellranger_1.1.0   repr_1.1.0         backports_1.1.5   
+[13] reprex_0.3.0       evaluate_0.14      highr_0.8          httr_1.4.1        
+[17] pillar_1.4.3       rlang_0.4.5        readxl_1.3.1       rstudioapi_0.11   
+[21] whisker_0.4        rmarkdown_2.1      munsell_0.5.0      broom_0.5.5       
+[25] compiler_3.6.0     httpuv_1.5.2       modelr_0.1.5       xfun_0.12         
+[29] pkgconfig_2.0.3    base64enc_0.1-3    htmltools_0.4.0    tidyselect_1.0.0  
+[33] fansi_0.4.1        crayon_1.3.4       dbplyr_1.4.2       withr_2.1.2       
+[37] later_1.0.0        grid_3.6.0         nlme_3.1-144       jsonlite_1.6.1    
+[41] gtable_0.3.0       lifecycle_0.2.0    DBI_1.1.0          git2r_0.26.1      
+[45] magrittr_1.5       scales_1.1.0       cli_2.0.2          stringi_1.4.5     
+[49] promises_1.1.0     xml2_1.2.2         ellipsis_0.3.0     generics_0.0.2    
+[53] vctrs_0.2.4        tools_3.6.0        glue_1.4.0         hms_0.5.3         
+[57] parallel_3.6.0     yaml_2.2.1         colorspace_1.4-1   rvest_0.3.5       
+[61] knitr_1.28         haven_2.2.0       </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Sam Portnow" />
+
+<meta name="date" content="2020-05-10" />
+
+<title>Clean JSON</title>
+
+<script src="site_libs/jquery/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui/jquery-ui.min.js"></script>
+<link href="site_libs/tocify/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify/jquery.tocify.js"></script>
+<script src="site_libs/navigation/tabsets.js"></script>
+<link href="site_libs/highlightjs/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs/highlight.js"></script>
+<link href="site_libs/font-awesome/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">clinical_trials</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/SamPortnow/clinical_trials">
+    <span class="fa fa-github"></span>
+     
+    Source code
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Clean JSON</h1>
+<h4 class="author">Sam Portnow</h4>
+<h4 class="date">2020-05-10</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2020-05-10
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>clinical_trials/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.1). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20200422code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20200422)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20200422code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20200422)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomSamPortnowclinicaltrialstreefe42025f19c8a2c80a04a43fe3893401f4fa8dcetargetblankfe42025a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> <a href="https://github.com/SamPortnow/clinical_trials/tree/fe42025f19c8a2c80a04a43fe3893401f4fa8dce" target="_blank">fe42025</a> </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongahrefhttpsgithubcomSamPortnowclinicaltrialstreefe42025f19c8a2c80a04a43fe3893401f4fa8dcetargetblankfe42025a" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version <a href="https://github.com/SamPortnow/clinical_trials/tree/fe42025f19c8a2c80a04a43fe3893401f4fa8dce" target="_blank">fe42025</a>. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .DS_Store
+    Ignored:    .Rhistory
+    Ignored:    .Rproj.user/
+    Ignored:    analysis/.DS_Store
+    Ignored:    code/.DS_Store
+    Ignored:    data/.DS_Store
+    Ignored:    data/raw/
+
+Untracked files:
+    Untracked:  analysis/CleanData.Rmd
+    Untracked:  analysis/_old/
+    Untracked:  code/.ipynb_checkpoints/APIToDF-checkpoint.ipynb
+    Untracked:  code/.ipynb_checkpoints/Untitled1-checkpoint.ipynb
+    Untracked:  code/.ipynb_checkpoints/Untitled2-checkpoint.ipynb
+    Untracked:  code/_old/
+    Untracked:  data/BaselineCategoryList.feather
+    Untracked:  data/BaselineClassDenomList.feather
+    Untracked:  data/BaselineDenom.feather
+    Untracked:  data/BaselineGroup.feather
+    Untracked:  data/BaselineMeasures.feather
+    Untracked:  data/OutcomeCategoryList.feather
+    Untracked:  data/OutcomeClass.feather
+    Untracked:  data/OutcomeClassDenomList.feather
+    Untracked:  data/OutcomeDenom.feather
+    Untracked:  data/OutcomeGroup.feather
+    Untracked:  data/labelled_data/
+    Untracked:  output/baseline_group_descriptions.txt
+    Untracked:  output/baseline_group_titles.txt
+    Untracked:  output/groups_for_cleaning.xlsx
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   code/.ipynb_checkpoints/API_to_Dataframe-checkpoint.ipynb
+    Deleted:    code/API_to_Dataframe.ipynb
+    Deleted:    code/API_to_Dataframe_Scratch.ipynb
+    Deleted:    code/Untitled.ipynb
+    Deleted:    data/README.md
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/GetJSON.Rmd</code>) and HTML (<code>docs/GetJSON.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+<a href="https://github.com/SamPortnow/clinical_trials/blob/fe42025f19c8a2c80a04a43fe3893401f4fa8dce/analysis/GetJSON.Rmd" target="_blank">fe42025</a>
+</td>
+<td>
+SamPortnow
+</td>
+<td>
+2020-05-10
+</td>
+<td>
+up to annotating the dataset
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<p>For this project, I wanted to put the information located in the <a href="https://clinicaltrials.gov/api/gui">Clinical Trials API</a> into dataframes for later analysis. The Clinical Trials is aewsome, but the data contained within is difficult to analyze. There’s lots of nesting, and at times it’s unclear how deep the nesting is. In order to get the data into a proper format, I wrote a recursive function that would continue to build the dataframes while traversing down to the lowest level of nesting.</p>
+<pre class="r"><code>library(tufte)
+library(tidyverse)</code></pre>
+<pre><code>── Attaching packages ────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>✓ ggplot2 3.3.0     ✓ purrr   0.3.3
+✓ tibble  3.0.0     ✓ dplyr   0.8.5
+✓ tidyr   1.0.2     ✓ stringr 1.4.0
+✓ readr   1.3.1     ✓ forcats 0.5.0</code></pre>
+<pre><code>Warning: package &#39;tibble&#39; was built under R version 3.6.2</code></pre>
+<pre><code>── Conflicts ───────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+x dplyr::filter() masks stats::filter()
+x dplyr::lag()    masks stats::lag()</code></pre>
+<pre class="r"><code>library(jsonlite)</code></pre>
+<pre><code>
+Attaching package: &#39;jsonlite&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:purrr&#39;:
+
+    flatten</code></pre>
+<pre class="r"><code>library(httr)
+library(glue)</code></pre>
+<pre><code>Warning: package &#39;glue&#39; was built under R version 3.6.2</code></pre>
+<pre><code>
+Attaching package: &#39;glue&#39;</code></pre>
+<pre><code>The following object is masked from &#39;package:dplyr&#39;:
+
+    collapse</code></pre>
+<pre class="r"><code>library(fs)</code></pre>
+<pre><code>Warning: package &#39;fs&#39; was built under R version 3.6.2</code></pre>
+<pre class="r"><code>library(here)</code></pre>
+<pre><code>here() starts at /Users/samportnow/personal_projects/clinical_trials</code></pre>
+<pre class="r"><code>library(feather)
+
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion(&#39;tufte&#39;))
+options(htmltools.dir.version = FALSE)</code></pre>
+<p>The clinical trials API let’s you search by keyword, and it returns information to you 100 studies at a time, so here I set up my start (min_rnk) and end (max_rnk). I’ll keep added to these indeces until I reach all of the studies returned in the query.</p>
+<pre class="r"><code>min_rnk = 1
+max_rnk = 100</code></pre>
+<p>Here’s my function for unpacking the data. When I read in the data from R with jsonlite, all of the information is stored in nested dataframes, which R complains about a lot – it’s possible to have lists of dataframes in columns in R, but not columns of dataframes. I don’t quite understand why fromjson does seem to store some dataframes as columns, but I was only focused here on unpacking the data.</p>
+<pre class="r"><code>unpack_it = function(.df, col = NULL){
+  
+  # sometimes, I supply the name of the dataframe column i want to unpack
+  #  and sometimes the column doesnt exit, so i&#39;ll do any early return
+  if (! is.null(col)){
+    if (! col %in% names(.df))return (NULL)
+  }
+  # if the column is a dataframe, store it as a list, but make sure to unpack that dataframe column first;
+  # otherwise I got into a situation where I had columns that were needlessly nested
+  .df = .df %&gt;% mutate_if(is.data.frame, ~ as.list(unlist(., recursive = F)))
+  # if there are no list columns, early return
+  lc &lt;- purrr::keep(.df, is.list) %&gt;% names
+  if( length(lc) == 0 ) return(.df)
+  
+  # if i didnt supply the column, then i want to unpack all of the list columns
+  # otherwise i just read the column i supplied
+  if (! is.null(col)){
+    list_cols = .df[,col]  
+  }else{
+    list_cols = .df[,lc]
+  }
+  # now i go row by by row and join up the unpacked dataframe with the non-dataframe objects in that column
+  .df = map_dfr(1:nrow(.df), function(ind){
+    
+    pluck_it = list_cols[[ind]]
+    top_vec = .df[ind,] %&gt;% select_if(negate(is.list)) 
+    # if there was no dataframe to grab, just return all the stuff that&#39;s not a list
+    if (is.null(pluck_it)){
+      return(top_vec)
+    }
+    # same as above -- i dont want needlessy nested columns
+    pluck_it = pluck_it %&gt;% mutate_if(is.data.frame, ~ as.list(unlist(., recursive = F)))
+    
+    top_vec_names = top_vec %&gt;% names()
+    pluck_it[,top_vec_names] = top_vec
+    pluck_it
+    
+  })
+  # look for new list columns
+  # if there are none, return what you have
+  new_list_cols = purrr::keep(.df, is.list) %&gt;% names
+  if (length(new_list_cols) == 0){
+    return (.df)
+  }
+  # if its one, then just unpack some more, and no need to supply a column name
+  else if (length(new_list_cols) == 1){
+   unpack_it(.df)
+  # otherwise, make a list of dataframes where you pass the column name one at a time
+  }else{
+    .df = map(new_list_cols, ~ unpack_it(.df, .))
+    names(.df) = new_list_cols
+    .df
+  }
+  
+  
+  
+}</code></pre>
+<p>And here is where I actually do my queries and save the data. For this project, I am only interested in studies related to depression.</p>
+<pre class="r"><code>hit_api = function(min_rnk = 1, max_rnk = 100){
+  
+  # dont want to be a jerk and hit the api too much
+  Sys.sleep(10)
+  
+  # look for all studies with depression 
+  api_url = &quot;https://clinicaltrials.gov/api/query/full_studies?&quot;
+  qry = list(&#39;expr&#39; = &#39;depression&#39;, &#39;fmt&#39; = &#39;json&#39;, &#39;min_rnk&#39; = min_rnk, &#39;max_rnk&#39; = max_rnk)
+  
+  r = GET(api_url, query = qry)
+  r_df = fromJSON(content(r, &#39;text&#39;))
+  # get the studes
+  studies = r_df$FullStudiesResponse$FullStudies$Study
+  
+  print (min_rnk)
+  print (max_rnk)
+
+  # map over all the studies 
+  outcomes = map(1:nrow(studies), function(x){
+
+    print (x)
+    # Study ID 
+    StudyId = studies[x,]$ProtocolSection$IdentificationModule$NCTId
+    # Title 
+    Title =studies[x,]$ProtocolSection$IdentificationModule$OfficialTitle
+    # Keywords
+    Keywords = studies[x,]$ProtocolSection$ConditionsModule %&gt;% 
+      unnest(c(ConditionList, KeywordList)) %&gt;% unnest(KeywordList) %&gt;% unnest(ConditionList)
+    # Status
+    Status = studies[x,]$ProtocolSection$StatusModule$OverallStatus
+    # Outcomes
+    outcomes = studies[x,]$ResultsSection$OutcomeMeasuresModule$OutcomeMeasureList
+    
+    if (! is.null(outcomes)){
+       outcomes = outcomes %&gt;% pull() %&gt;% pluck(1)
+    }
+
+    
+    if (is.null(outcomes)){
+      # if there are no outcomes, then i dont want hte data 
+      return (&#39;Passing&#39;)
+    }    
+    # Baseline Information
+    BaselineGroup = studies[x,]$ResultsSection$BaselineCharacteristicsModule %&gt;% unpack_it(&#39;BaselineGroupList&#39;)
+    
+    if (is.data.frame(BaselineGroup)){
+      BaselineGroup = list(&#39;BaselineGroup&#39; = BaselineGroup)
+    }
+    
+    BaselineDenom = studies[x,]$ResultsSection$BaselineCharacteristicsModule %&gt;% unpack_it(&#39;BaselineDenomList&#39;)
+    
+    if (is.data.frame(BaselineDenom)){
+      BaselineDenom = list(&#39;BaselineDenom&#39; = BaselineDenom)
+    }
+    
+    BaselineMeasures = studies[x,]$ResultsSection$BaselineCharacteristicsModule %&gt;% unpack_it(&#39;BaselineMeasureList&#39;)
+    
+    if (is.data.frame(BaselineMeasures)){
+      BaselineMeasures = list(&#39;BaselineMeasures&#39; = BaselineMeasures)
+    }
+    
+
+    # Outcome Information
+    OutcomeGroup =  studies[x,]$ResultsSection$OutcomeMeasuresModule$OutcomeMeasureList %&gt;% pull() %&gt;% pluck(1) %&gt;% unpack_it(&#39;OutcomeGroupList&#39;)
+    
+    if (is.data.frame(OutcomeGroup)){
+      OutcomeGroup = list(&#39;OutcomeGroup&#39; = OutcomeGroup)
+    }
+    
+    OutcomeDenom =   studies[x,]$ResultsSection$OutcomeMeasuresModule$OutcomeMeasureList %&gt;% pull() %&gt;% pluck(1) %&gt;% unpack_it(&#39;OutcomeDenomList&#39;)
+    
+    if (is.data.frame(OutcomeDenom)){
+      OutcomeDenom= list(&#39;OutcomeDenom&#39; = OutcomeDenom)
+    }    
+    
+    OutcomeClass = studies[x,]$ResultsSection$OutcomeMeasuresModule$OutcomeMeasureList %&gt;% pull() %&gt;% pluck(1) %&gt;% unpack_it(&#39;OutcomeClassList&#39;)
+    
+    if (is.data.frame(OutcomeClass)){
+      OutcomeClass = list(&#39;OutcomeClass&#39; = OutcomeClass)
+    }    
+    
+
+    Baseline = c(BaselineGroup, BaselineDenom, BaselineMeasures) %&gt;% compact()
+    Outcomes = c(OutcomeGroup,  OutcomeDenom, OutcomeClass) %&gt;% compact()
+
+      
+    walk(names(Baseline), function(x){
+      
+      Baseline[[x]]$StudyId = StudyId
+
+      baseline_file_path = here::here(&#39;data&#39;, &#39;raw&#39;, paste0(StudyId, &#39;-&#39;, x, &#39;.feather&#39;))
+      write_feather(Baseline[[x]], baseline_file_path)
+
+    })    
+
+    walk(names(Outcomes), function(x){
+      
+      Outcomes[[x]]$StudyId = StudyId
+
+      outcomes_file_path = here::here(&#39;data&#39;, &#39;raw&#39;, paste0(StudyId, &#39;-&#39;, x, &#39;.feather&#39;))
+      write_feather(Outcomes[[x]],  outcomes_file_path)
+
+    })    
+    
+
+    
+    return (&#39;Written&#39;)
+  
+  })
+  
+  num_studies = r_df$FullStudiesResponse$NStudiesFound
+  
+  if (num_studies &gt; max_rnk){
+    hit_api(min_rnk + 100, max_rnk + 100)
+  }
+}</code></pre>
+<p>I already have the whole dataset, so I’m just going to run this over a few files. (At the momement, there are a max of 20882)</p>
+<pre class="r"><code>hit_api(20901, 21000)</code></pre>
+<pre><code>[1] 20901
+[1] 21000
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24
+[1] 25
+[1] 26
+[1] 27
+[1] 28
+[1] 29
+[1] 30
+[1] 31
+[1] 32
+[1] 33
+[1] 34
+[1] 35
+[1] 36
+[1] 37
+[1] 38
+[1] 39
+[1] 40
+[1] 41
+[1] 42
+[1] 43
+[1] 44
+[1] 45
+[1] 46
+[1] 47
+[1] 48
+[1] 49
+[1] 50
+[1] 51
+[1] 52
+[1] 53
+[1] 54
+[1] 55
+[1] 56
+[1] 57
+[1] 58
+[1] 59
+[1] 60
+[1] 61
+[1] 62
+[1] 63
+[1] 64
+[1] 65
+[1] 66
+[1] 67
+[1] 68
+[1] 69
+[1] 70
+[1] 71
+[1] 72
+[1] 73
+[1] 74
+[1] 75
+[1] 76
+[1] 77
+[1] 78
+[1] 79
+[1] 80
+[1] 81
+[1] 82
+[1] 83
+[1] 84
+[1] 85
+[1] 86
+[1] 87
+[1] 88
+[1] 89
+[1] 90
+[1] 91
+[1] 92
+[1] 93
+[1] 94
+[1] 95
+[1] 96
+[1] 97
+[1] 98
+[1] 99
+[1] 100
+[1] 21001
+[1] 21100
+[1] 1
+[1] 2
+[1] 3
+[1] 4
+[1] 5
+[1] 6
+[1] 7
+[1] 8
+[1] 9
+[1] 10
+[1] 11
+[1] 12
+[1] 13
+[1] 14
+[1] 15
+[1] 16
+[1] 17
+[1] 18
+[1] 19
+[1] 20
+[1] 21
+[1] 22
+[1] 23
+[1] 24</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 3.6.0 (2019-04-26)
+Platform: x86_64-apple-darwin15.6.0 (64-bit)
+Running under: macOS  10.15.3
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
+LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+
+locale:
+[1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] feather_0.3.5   here_0.1        fs_1.4.1        glue_1.4.0     
+ [5] httr_1.4.1      jsonlite_1.6.1  forcats_0.5.0   stringr_1.4.0  
+ [9] dplyr_0.8.5     purrr_0.3.3     readr_1.3.1     tidyr_1.0.2    
+[13] tibble_3.0.0    ggplot2_3.3.0   tidyverse_1.3.0 tufte_0.5      
+[17] workflowr_1.6.1
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.0.0 xfun_0.12        haven_2.2.0      lattice_0.20-38 
+ [5] colorspace_1.4-1 vctrs_0.2.4      generics_0.0.2   htmltools_0.4.0 
+ [9] yaml_2.2.1       rlang_0.4.5      later_1.0.0      pillar_1.4.3    
+[13] withr_2.1.2      DBI_1.1.0        dbplyr_1.4.2     readxl_1.3.1    
+[17] modelr_0.1.5     lifecycle_0.2.0  cellranger_1.1.0 munsell_0.5.0   
+[21] gtable_0.3.0     rvest_0.3.5      evaluate_0.14    knitr_1.28      
+[25] httpuv_1.5.2     curl_4.3         fansi_0.4.1      broom_0.5.5     
+[29] Rcpp_1.0.3       promises_1.1.0   backports_1.1.5  scales_1.1.0    
+[33] hms_0.5.3        digest_0.6.25    stringi_1.4.5    rprojroot_1.3-2 
+[37] grid_3.6.0       cli_2.0.2        tools_3.6.0      magrittr_1.5    
+[41] crayon_1.3.4     whisker_0.4      pkgconfig_2.0.3  ellipsis_0.3.0  
+[45] xml2_1.2.2       reprex_0.3.0     lubridate_1.7.4  rstudioapi_0.11 
+[49] assertthat_0.2.1 rmarkdown_2.1    R6_2.4.1         nlme_3.1-144    
+[53] git2r_0.26.1     compiler_3.6.0  </code></pre>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
