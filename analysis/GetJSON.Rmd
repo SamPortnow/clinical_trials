@@ -1,0 +1,249 @@
+---
+title: "Clean JSON"
+author: "Sam Portnow"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html: default
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+link-citations: yes
+---
+
+
+For this project, I wanted to put the information located in the [Clinical Trials API](https://clinicaltrials.gov/api/gui) into dataframes for later analysis. The Clinical Trials is aewsome, but the data contained within is difficult to analyze. There's lots of nesting, and at times it's unclear how deep the nesting is. In order to get the data into a proper format, I wrote a recursive function that would continue to build the dataframes while traversing down to the lowest level of nesting. 
+
+```{r setup}
+
+library(tufte)
+library(tidyverse)
+library(jsonlite)
+library(httr)
+library(glue)
+library(fs)
+library(here)
+library(feather)
+
+# invalidate cache when the tufte version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tufte'))
+options(htmltools.dir.version = FALSE)
+```
+
+
+The clinical trials API let's you search by keyword, and it returns information to you 100 studies at a time, so here I set up my start (min_rnk) and end (max_rnk). I'll keep added to these indeces until I reach all of the studies returned in the query. 
+
+```{r warning=FALSE, message=FALSE}
+
+
+min_rnk = 1
+max_rnk = 100
+
+
+```
+
+
+Here's my function for unpacking the data. When I read in the data from R with jsonlite, all of the information is stored in nested dataframes, which R complains about a lot -- it's possible to have lists of dataframes in columns in R, but not columns of dataframes. I don't quite understand why fromjson does seem to store some dataframes as columns, but I was only focused here on unpacking the data. 
+
+```{r}
+
+
+unpack_it = function(.df, col = NULL){
+  
+  # sometimes, I supply the name of the dataframe column i want to unpack
+  #  and sometimes the column doesnt exit, so i'll do any early return
+  if (! is.null(col)){
+    if (! col %in% names(.df))return (NULL)
+  }
+  # if the column is a dataframe, store it as a list, but make sure to unpack that dataframe column first;
+  # otherwise I got into a situation where I had columns that were needlessly nested
+  .df = .df %>% mutate_if(is.data.frame, ~ as.list(unlist(., recursive = F)))
+  # if there are no list columns, early return
+  lc <- purrr::keep(.df, is.list) %>% names
+  if( length(lc) == 0 ) return(.df)
+  
+  # if i didnt supply the column, then i want to unpack all of the list columns
+  # otherwise i just read the column i supplied
+  if (! is.null(col)){
+    list_cols = .df[,col]  
+  }else{
+    list_cols = .df[,lc]
+  }
+  # now i go row by by row and join up the unpacked dataframe with the non-dataframe objects in that column
+  .df = map_dfr(1:nrow(.df), function(ind){
+    
+    pluck_it = list_cols[[ind]]
+    top_vec = .df[ind,] %>% select_if(negate(is.list)) 
+    # if there was no dataframe to grab, just return all the stuff that's not a list
+    if (is.null(pluck_it)){
+      return(top_vec)
+    }
+    # same as above -- i dont want needlessy nested columns
+    pluck_it = pluck_it %>% mutate_if(is.data.frame, ~ as.list(unlist(., recursive = F)))
+    
+    top_vec_names = top_vec %>% names()
+    pluck_it[,top_vec_names] = top_vec
+    pluck_it
+    
+  })
+  # look for new list columns
+  # if there are none, return what you have
+  new_list_cols = purrr::keep(.df, is.list) %>% names
+  if (length(new_list_cols) == 0){
+    return (.df)
+  }
+  # if its one, then just unpack some more, and no need to supply a column name
+  else if (length(new_list_cols) == 1){
+   unpack_it(.df)
+  # otherwise, make a list of dataframes where you pass the column name one at a time
+  }else{
+    .df = map(new_list_cols, ~ unpack_it(.df, .))
+    names(.df) = new_list_cols
+    .df
+  }
+  
+  
+  
+}
+
+```
+
+And here is where I actually do my queries and save the data. For this project, I am only interested in studies related to depression. 
+
+```{r}
+
+
+
+hit_api = function(min_rnk = 1, max_rnk = 100){
+  
+  # dont want to be a jerk and hit the api too much
+  Sys.sleep(10)
+  
+  # look for all studies with depression 
+  api_url = "https://clinicaltrials.gov/api/query/full_studies?"
+  qry = list('expr' = 'depression', 'fmt' = 'json', 'min_rnk' = min_rnk, 'max_rnk' = max_rnk)
+  
+  r = GET(api_url, query = qry)
+  r_df = fromJSON(content(r, 'text'))
+  # get the studes
+  studies = r_df$FullStudiesResponse$FullStudies$Study
+  
+  print (min_rnk)
+  print (max_rnk)
+
+  # map over all the studies 
+  outcomes = map(1:nrow(studies), function(x){
+
+    print (x)
+    # Study ID 
+    StudyId = studies[x,]$ProtocolSection$IdentificationModule$NCTId
+    # Title 
+    Title =studies[x,]$ProtocolSection$IdentificationModule$OfficialTitle
+    # Keywords
+    Keywords = studies[x,]$ProtocolSection$ConditionsModule %>% 
+      unnest(c(ConditionList, KeywordList)) %>% unnest(KeywordList) %>% unnest(ConditionList)
+    # Status
+    Status = studies[x,]$ProtocolSection$StatusModule$OverallStatus
+    # Outcomes
+    outcomes = studies[x,]$ResultsSection$OutcomeMeasuresModule$OutcomeMeasureList
+    
+    if (! is.null(outcomes)){
+       outcomes = outcomes %>% pull() %>% pluck(1)
+    }
+
+    
+    if (is.null(outcomes)){
+      # if there are no outcomes, then i dont want hte data 
+      return ('Passing')
+    }    
+    # Baseline Information
+    BaselineGroup = studies[x,]$ResultsSection$BaselineCharacteristicsModule %>% unpack_it('BaselineGroupList')
+    
+    if (is.data.frame(BaselineGroup)){
+      BaselineGroup = list('BaselineGroup' = BaselineGroup)
+    }
+    
+    BaselineDenom = studies[x,]$ResultsSection$BaselineCharacteristicsModule %>% unpack_it('BaselineDenomList')
+    
+    if (is.data.frame(BaselineDenom)){
+      BaselineDenom = list('BaselineDenom' = BaselineDenom)
+    }
+    
+    BaselineMeasures = studies[x,]$ResultsSection$BaselineCharacteristicsModule %>% unpack_it('BaselineMeasureList')
+    
+    if (is.data.frame(BaselineMeasures)){
+      BaselineMeasures = list('BaselineMeasures' = BaselineMeasures)
+    }
+    
+
+    # Outcome Information
+    OutcomeGroup =  studies[x,]$ResultsSection$OutcomeMeasuresModule$OutcomeMeasureList %>% pull() %>% pluck(1) %>% unpack_it('OutcomeGroupList')
+    
+    if (is.data.frame(OutcomeGroup)){
+      OutcomeGroup = list('OutcomeGroup' = OutcomeGroup)
+    }
+    
+    OutcomeDenom =   studies[x,]$ResultsSection$OutcomeMeasuresModule$OutcomeMeasureList %>% pull() %>% pluck(1) %>% unpack_it('OutcomeDenomList')
+    
+    if (is.data.frame(OutcomeDenom)){
+      OutcomeDenom= list('OutcomeDenom' = OutcomeDenom)
+    }    
+    
+    OutcomeClass = studies[x,]$ResultsSection$OutcomeMeasuresModule$OutcomeMeasureList %>% pull() %>% pluck(1) %>% unpack_it('OutcomeClassList')
+    
+    if (is.data.frame(OutcomeClass)){
+      OutcomeClass = list('OutcomeClass' = OutcomeClass)
+    }    
+    
+
+    Baseline = c(BaselineGroup, BaselineDenom, BaselineMeasures) %>% compact()
+    Outcomes = c(OutcomeGroup,  OutcomeDenom, OutcomeClass) %>% compact()
+
+      
+    walk(names(Baseline), function(x){
+      
+      Baseline[[x]]$StudyId = StudyId
+
+      baseline_file_path = here::here('data', 'raw', paste0(StudyId, '-', x, '.feather'))
+      write_feather(Baseline[[x]], baseline_file_path)
+
+    })    
+
+    walk(names(Outcomes), function(x){
+      
+      Outcomes[[x]]$StudyId = StudyId
+
+      outcomes_file_path = here::here('data', 'raw', paste0(StudyId, '-', x, '.feather'))
+      write_feather(Outcomes[[x]],  outcomes_file_path)
+
+    })    
+    
+
+    
+    return ('Written')
+  
+  })
+  
+  num_studies = r_df$FullStudiesResponse$NStudiesFound
+  
+  if (num_studies > max_rnk){
+    hit_api(min_rnk + 100, max_rnk + 100)
+  }
+}
+
+
+
+
+```
+
+I already have the whole dataset, so I'm just going to run this over a few files. (At the momement, there are a max of 20882)
+
+```{r}
+
+hit_api(20901, 21000)
+
+```
+
+

@@ -1,0 +1,63 @@
+---
+title: "Gather Dataframes"
+author: "Sam Portnow"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_html: default
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+  tufte::tufte_book:
+    citation_package: natbib
+    latex_engine: xelatex
+link-citations: yes
+---
+
+
+In my previous analysis, I put the json the  [Clinical Trials API](https://clinicaltrials.gov/api/gui) into dataframes, where each study was saved as a separate dataframe. Now, I want to read all that information in and store it into larger datasets.
+
+```{r}
+library(tidyverse)
+library(here)
+library(fs)
+library(feather)
+```
+
+First lets look at the files
+
+```{r look}
+data_files = dir_ls(here::here('data', 'raw'), type = 'file')
+
+data_files[sample(length(data_files), 10)]
+```
+
+Everything is split out by a - 
+
+```{r split}
+
+data_file_types = str_extract(data_files, '-.*') %>% str_replace('-', '') %>% str_replace('.feather', '') %>% unique()
+data_file_types
+data_files_types = na.omit(data_file_types)
+```
+
+Okay, so there are 10 data file types. Let's put walk over theme bind all the info we need, and write out our big dataset. 
+
+```{r write_feather}
+
+walk(data_file_types, function(x){
+  
+  print (x)
+  
+  data_sub = data_files[str_detect(data_files, x)]
+  data_write = map_dfr(data_sub, read_feather)  
+  write_feather(data_write, here::here('data', paste0(x, '.feather')))
+  
+})
+
+```
+
+
+```{r}
+
+```
+

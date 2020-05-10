@@ -8,4 +8,5 @@ editor_options:
   chunk_output_type: console
 ---
 
-Welcome to my research website.
+This project hosts code for exploring the [Clinical Trials API](https://clinicaltrials.gov/api/gui). Ultimately, I want to get to a place where I can build a shiny dashboard to investigate the effects of different treatments on anxiety and depression. 
+

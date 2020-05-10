@@ -1,0 +1,74 @@
+---
+title: "InvestigateDataSets"
+author: "Sam Portnow"
+date: "5/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(feather)
+library(skimr)
+library(gt)
+library(here)
+library(fs)
+library(janitor)
+library(refinr)
+library(gtsummary)
+```
+
+# Introduction
+
+I downloaded datasets from the clinical trials API. It's time to clean them up. 
+
+# Baseline Datasets
+
+## Baseline Measures
+
+## Baseline Category
+
+```{r}
+b_cat = read_feather(here::here('data', 'BaselineCategoryList.feather'))
+skim(b_cat)
+```
+Let's look at some individual rows.
+
+```{r}
+
+b_cat %>% sample_n(5) 
+
+```
+
+
+## Baseline Class Denominator
+
+## BaslineGroup
+
+```{r}
+
+b_group = read_feather(here::here('data', 'BaselineGroup.feather'))
+skim(b_group)
+  
+```
+This dataset contains information about the different baseline groups. Let's take a closer look
+
+```{r}
+b_group %>% sample_n(10) 
+```
+This is very important information! It tells me everything I need to know about the groups. I'm going to have to do a lot of cleaning to the GroupTitle. There are many different ways that a title can be parsed, so I'm going to try to label it! To do that, I'm going to write out the data to a text file and send it up to my (doccano app)[https://psyc-articles.herokuapp.com]. Doccano is a great open source tool for annotating documents. 
+
+```{r}
+
+write_lines(b_group$BaselineGroupTitle, here::here('output', 'baseline_group_titles.txt'))
+
+write_lines(b_group %>% 
+              filter(! is.na(BaselineGroupDescription)) %>% 
+              filter(str_squish(BaselineGroupDescription) != '') %>% 
+              filter(nchar(BaselineGroupDescription) > 5) %>% 
+              sample_frac(1) %>% pull(BaselineGroupDescription) %>% str_squish(), here::here('output', 'baseline_group_descriptions.txt'))
+
+```
+
+
